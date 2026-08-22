@@ -22,7 +22,7 @@ public class ItemOrden {
     private Orden orden;
 
     @Column(nullable = false)
-    private Long juegoId;
+    private Long productoId;
 
     @Column(nullable = false)
     private Integer cantidad;
@@ -31,8 +31,8 @@ public class ItemOrden {
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal precioUnitario;
 
-    public ItemOrden(Long juegoId, Integer cantidad, BigDecimal precioUnitario) {
-        this.juegoId = juegoId;
+    public ItemOrden(Long productoId, Integer cantidad, BigDecimal precioUnitario) {
+        this.productoId = productoId;
         this.cantidad = cantidad;
         this.precioUnitario = precioUnitario;
     }
