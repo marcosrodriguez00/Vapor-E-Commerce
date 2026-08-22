@@ -1,6 +1,6 @@
 package com.vapor.vapor.service;
 
-import com.vapor.vapor.dto.CompraRequest;
+import com.vapor.vapor.dto.CompraRequestDTO;
 import com.vapor.vapor.model.ItemOrden;
 import com.vapor.vapor.model.Orden;
 import com.vapor.vapor.repository.OrdenRepository;
@@ -22,11 +22,11 @@ public class OrdenService {
     }
 
     @Transactional
-    public Orden crear(CompraRequest request) {
+    public Orden crear(CompraRequestDTO request) {
         validar(request);
         Orden orden = new Orden(request.usuarioId());
-        for (CompraRequest.Item item : request.items()) {
-            orden.agregarItem(new ItemOrden(item.juegoId(), item.cantidad(), item.precioUnitario()));
+        for (CompraRequestDTO.Item item : request.items()) {
+            orden.agregarItem(new ItemOrden(item.productoId(), item.cantidad(), item.precioUnitario()));
         }
         return ordenRepository.save(orden);
     }
@@ -40,16 +40,16 @@ public class OrdenService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Orden " + id + " no encontrada"));
     }
 
-    private void validar(CompraRequest request) {
+    private void validar(CompraRequestDTO request) {
         if (request == null || request.usuarioId() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Falta el usuarioId");
         }
         if (request.items() == null || request.items().isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La compra no tiene items");
         }
-        for (CompraRequest.Item item : request.items()) {
-            if (item.juegoId() == null) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Falta el juegoId en un item");
+        for (CompraRequestDTO.Item item : request.items()) {
+            if (item.productoId() == null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Falta el productoId en un item");
             }
             if (item.cantidad() == null || item.cantidad() <= 0) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La cantidad debe ser mayor a 0");

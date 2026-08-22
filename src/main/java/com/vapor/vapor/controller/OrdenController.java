@@ -1,6 +1,6 @@
 package com.vapor.vapor.controller;
 
-import com.vapor.vapor.dto.CompraRequest;
+import com.vapor.vapor.dto.CompraRequestDTO;
 import com.vapor.vapor.dto.OrdenDTO;
 import com.vapor.vapor.service.OrdenService;
 import org.springframework.http.HttpStatus;
@@ -20,7 +20,7 @@ public class OrdenController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public OrdenDTO crear(@RequestBody CompraRequest request) {
+    public OrdenDTO crear(@RequestBody CompraRequestDTO request) {
         return OrdenDTO.from(ordenService.crear(request));
     }
 
