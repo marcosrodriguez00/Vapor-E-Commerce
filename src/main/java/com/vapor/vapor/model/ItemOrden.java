@@ -40,4 +40,9 @@ public class ItemOrden {
     public BigDecimal getSubtotal() {
         return precioUnitario.multiply(BigDecimal.valueOf(cantidad));
     }
+
+    public void add(ItemOrden item) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'add'");
+    }
 }

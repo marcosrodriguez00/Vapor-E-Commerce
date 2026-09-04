@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Getter
@@ -40,13 +41,14 @@ public class Orden {
 
     public void agregarItem(ItemOrden item) {
         item.setOrden(this);
-        items.add(item);
+        item.add(item);
         recalcularTotal();
     }
 
     public void recalcularTotal() {
         total = items.stream()
                 .map(ItemOrden::getSubtotal)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+                .filter(Objects::nonNull)
+                .reduce(BigDecimal.ZERO, (a, b) -> a.add(b));
     }
 }
