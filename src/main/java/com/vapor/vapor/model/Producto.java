@@ -45,6 +45,12 @@ public class Producto {
         inverseJoinColumns = @JoinColumn(name = "categoria_id")
     )
     private List<Categoria> categorias = new ArrayList<>();
+    /** Usuario que publicó el producto. Nulo para los datos de seed. */
+    private Long usuarioId;
+
+    // ponytail: género como String hasta que exista la entidad Categoria del contexto.md
+    private String genero;
+
 
     /** Sólo URLs, sin upload de binarios. */
     @ElementCollection
