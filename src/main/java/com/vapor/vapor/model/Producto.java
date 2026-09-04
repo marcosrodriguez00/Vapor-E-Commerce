@@ -52,10 +52,6 @@ public class Producto {
     @Column(name = "url")
     private List<String> imagenes = new ArrayList<>();
 
-    /** Lado inverso de la ManyToMany: usuarios que tienen este producto en su biblioteca. */
-    //@ManyToMany(mappedBy = "biblioteca")
-    //private List<Usuario> propietarios = new ArrayList<>();
-
     // Constructores adaptados
     public Producto(String nombre, String descripcion, BigDecimal precio, Integer stock) {
         this.nombre = nombre;
