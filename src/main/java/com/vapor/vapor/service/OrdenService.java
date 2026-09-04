@@ -1,8 +1,8 @@
 package com.vapor.vapor.service;
 
 import com.vapor.vapor.dto.CompraRequestDTO;
-import com.vapor.vapor.model.ItemOrden;
 import com.vapor.vapor.model.Orden;
+import com.vapor.vapor.model.Producto;
 import com.vapor.vapor.repository.OrdenRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -11,6 +11,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class OrdenService {
@@ -25,8 +26,10 @@ public class OrdenService {
     public Orden crear(CompraRequestDTO request) {
         validar(request);
         Orden orden = new Orden(request.usuarioId());
-        for (CompraRequestDTO.Item item : request.items()) {
-            orden.agregarItem(new ItemOrden(item.productoId(), item.cantidad(), item.precioUnitario()));
+        for (Map.Entry<Producto, Integer> entry : request.carrito().getItems().entrySet()) {
+            Producto producto = entry.getKey();
+            Integer cantidad = entry.getValue();
+            orden.agregarItem(cantidad, producto);
         }
         return ordenRepository.save(orden);
     }
@@ -44,17 +47,17 @@ public class OrdenService {
         if (request == null || request.usuarioId() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Falta el usuarioId");
         }
-        if (request.items() == null || request.items().isEmpty()) {
+        if (request.carrito() == null || request.carrito().getItems().isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La compra no tiene items");
         }
-        for (CompraRequestDTO.Item item : request.items()) {
-            if (item.productoId() == null) {
+        for (Map.Entry<Producto, Integer> entry : request.carrito().getItems().entrySet()) {
+            if (entry.getKey() == null || entry.getKey().getId() == null) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Falta el productoId en un item");
             }
-            if (item.cantidad() == null || item.cantidad() <= 0) {
+            if (entry.getValue() == null || entry.getValue() <= 0) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La cantidad debe ser mayor a 0");
             }
-            if (item.precioUnitario() == null || item.precioUnitario().compareTo(BigDecimal.ZERO) < 0) {
+            if (entry.getKey().getPrecio() == null || entry.getKey().getPrecio().compareTo(BigDecimal.ZERO) < 0) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El precio no puede ser negativo");
             }
         }

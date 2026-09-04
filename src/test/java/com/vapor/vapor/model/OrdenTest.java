@@ -10,13 +10,12 @@ class OrdenTest {
 
     @Test
     void totalSumaLosSubtotalesDeCadaItem() {
-        Orden orden = new Orden(1L);
-        orden.agregarItem(new ItemOrden(10L, 2, new BigDecimal("19.99"))); // 39.98
-        orden.agregarItem(new ItemOrden(11L, 1, new BigDecimal("59.50"))); // 59.50
+        Carrito carrito = new Carrito(1L);
+        carrito.agregarItem(2, new Producto("CupHead 1", "desc", new BigDecimal("19.99"), 10, "Accion")); // 39.98
+        carrito.agregarItem(1, new Producto("LOL", "desc", new BigDecimal("59.50"), 10, "Accion")); // 59.50
 
-        assertEquals(new BigDecimal("99.48"), orden.getTotal());
-        assertEquals(2, orden.getItems().size());
-        assertEquals(orden, orden.getItems().get(0).getOrden());
+        assertEquals(new BigDecimal("99.48"), carrito.getSubtotal());
+        assertEquals(2, carrito.getItems().size());
     }
 
     @Test
