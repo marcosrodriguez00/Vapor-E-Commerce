@@ -37,8 +37,14 @@ public class Producto {
     @Column(nullable = false)
     private TipoProducto tipo = TipoProducto.JUEGO;
 
-    // ponytail: género como String hasta que exista la entidad Categoria del contexto.md
-    private String genero;
+    /** Relación Muchos a Muchos con Categorías (Reemplaza el String temporal de género) */
+    @ManyToMany
+    @JoinTable(
+        name = "producto_categoria",
+        joinColumns = @JoinColumn(name = "producto_id"),
+        inverseJoinColumns = @JoinColumn(name = "categoria_id")
+    )
+    private List<Categoria> categorias = new ArrayList<>();
 
     /** Sólo URLs, sin upload de binarios. */
     @ElementCollection
@@ -50,16 +56,16 @@ public class Producto {
     //@ManyToMany(mappedBy = "biblioteca")
     //private List<Usuario> propietarios = new ArrayList<>();
 
-    public Producto(String nombre, String descripcion, BigDecimal precio, Integer stock, String genero) {
+    // Constructores adaptados
+    public Producto(String nombre, String descripcion, BigDecimal precio, Integer stock) {
         this.nombre = nombre;
         this.descripcion = descripcion;
         this.precio = precio;
         this.stock = stock;
-        this.genero = genero;
     }
 
-    public Producto(String nombre, String descripcion, BigDecimal precio, Integer stock, String genero, TipoProducto tipo) {
-        this(nombre, descripcion, precio, stock, genero);
+    public Producto(String nombre, String descripcion, BigDecimal precio, Integer stock, TipoProducto tipo) {
+        this(nombre, descripcion, precio, stock);
         this.tipo = tipo;
     }
 }
