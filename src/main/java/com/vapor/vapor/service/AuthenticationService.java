@@ -1,10 +1,13 @@
 package com.vapor.vapor.service;
 
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +31,7 @@ public class AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
+    
 
     /**
      * Método que realiza el registro de un nuevo usuario en el sistema.
@@ -93,6 +97,10 @@ public class AuthenticationService {
                 .apellido(request.getApellido())
                 // 2.3) Asigna el email del usuario (ya validado como único en PASO 1)
                 .email(request.getEmail())
+                // 2.4) Asigna la fecha de nacimiento del usuario desde el request
+                .fechaNacimiento(request.getFechaNacimiento())
+                // 2.4) Asigna el sexo del usuario desde el request
+                .sexo(request.getSexo())
                 // 2.4) ENCRIPTACIÓN DE LA CONTRASEÑA (PASO CRÍTICO DE SEGURIDAD)
                 //      Se utiliza passwordEncoder (PasswordEncoder de Spring Security) 
                 //      para codificar la contraseña usando el algoritmo BCrypt

@@ -1,5 +1,6 @@
 package com.vapor.vapor.model;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 
@@ -34,6 +35,8 @@ public class Usuario implements UserDetails {
     @Column(unique = true)
     private String email;
     private String password;
+    private LocalDate fechaNacimiento;
+    private String sexo;
     // El rol del usuario (ADMIN o USER) se almacena como un string en la base de datos
     // @Enumerated(EnumType.STRING) indica que el enum se guardará como texto en la base de datos, no como un número
     @Enumerated(EnumType.STRING)

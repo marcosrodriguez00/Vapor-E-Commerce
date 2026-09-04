@@ -1,5 +1,6 @@
 package com.vapor.vapor.dto;
 
+import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,4 +16,6 @@ public class RegisterRequest {
     private String apellido;
     private String email;
     private String password;
+    private LocalDate fechaNacimiento;
+    private String sexo;
 }
