@@ -21,7 +21,7 @@ public class CategoriaService {
     public List<CategoriaResponseDTO> obtenerTodas() {
         List<Categoria> categorias = categoriaRepository.findAll();
         return categorias.stream()
-                .map(cat -> new CategoriaResponseDTO(cat.getId(), cat.getNombre(), null, null, null, null, null, null))
+                .map(cat -> new CategoriaResponseDTO(cat.getId(), cat.getNombre()))
                 .toList();
     }
 }
