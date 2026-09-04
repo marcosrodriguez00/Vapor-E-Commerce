@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/compras")
-public class CompraController {
+public class compraController {
 
     @GetMapping("/mock")
     public Map<String, Object> obtenerCompraMock() {
