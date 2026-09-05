@@ -1,11 +1,14 @@
 package com.vapor.vapor.controller;
 
+import com.vapor.vapor.model.Producto;
+import com.vapor.vapor.security.Roles;
 import com.vapor.vapor.dto.ProductoRequestDTO;
 import com.vapor.vapor.dto.ProductoResponseDTO;
 import com.vapor.vapor.service.ProductoService;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -46,6 +49,9 @@ public class ProductoController {
             .orElse(ResponseEntity.notFound().build());        // 404
     }
 
+    // Solo ADMIN o VENDEDOR pueden crear productos (enunciado: "el usuario
+    // que crea el producto podrá manejar el stock y eliminarlo").
+    @PreAuthorize(Roles.ADMIN_OR_VENDEDOR)
     @PostMapping
     public ResponseEntity<ProductoResponseDTO> create(@RequestBody ProductoRequestDTO producto, Authentication authentication) {
         ProductoResponseDTO guardado = productoService.save(producto, authentication.getName());
