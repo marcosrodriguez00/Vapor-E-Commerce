@@ -73,7 +73,7 @@ public class Producto {
     }
 
 
-    public Object getUsuarioId() {
+    public Long getUsuarioId() {
         return this.usuarioID;
     }
 }
