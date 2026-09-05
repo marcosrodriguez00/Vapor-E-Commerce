@@ -37,8 +37,9 @@ public class Producto {
     @Column(nullable = false)
     private TipoProducto tipo = TipoProducto.JUEGO;
 
-    // ponytail: género como String hasta que exista la entidad Categoria del contexto.md
     private String genero;
+
+    private Long usuarioID;
 
     /** Sólo URLs, sin upload de binarios. */
     @ElementCollection
@@ -61,5 +62,18 @@ public class Producto {
     public Producto(String nombre, String descripcion, BigDecimal precio, Integer stock, String genero, TipoProducto tipo) {
         this(nombre, descripcion, precio, stock, genero);
         this.tipo = tipo;
+    }
+
+    public Long getProductoId() {
+        return this.id;
+    }
+
+    public void setUsuarioId(Long id) {
+        this.usuarioID = id;
+    }
+
+
+    public Long getUsuarioId() {
+        return this.usuarioID;
     }
 }

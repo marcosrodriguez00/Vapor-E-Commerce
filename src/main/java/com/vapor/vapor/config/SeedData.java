@@ -46,6 +46,6 @@ public class SeedData implements CommandLineRunner {
 
         productoRepository.saveAll(List.of(hades, stardew, civ, civGathering));
 
-        log.info("Seed cargado: {} usuarios, {} productos", productoRepository.count());
+        log.info("Seed cargado: {} productos", productoRepository.count());
     }
 }

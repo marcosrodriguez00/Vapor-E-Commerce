@@ -7,8 +7,8 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 @Entity
 @Getter
@@ -29,8 +29,11 @@ public class Orden {
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal total;
 
-    @OneToMany(mappedBy = "orden", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    private List<ItemOrden> items = new ArrayList<>();
+    @ElementCollection
+    @CollectionTable(name = "orden_item", joinColumns = @JoinColumn(name = "orden_id"))
+    @MapKeyJoinColumn(name = "producto_id")
+    @Column(name = "cantidad", nullable = false)
+    private Map<Producto, Integer> items = new HashMap<>();
 
     public Orden(Long usuarioId) {
         this.usuarioId = usuarioId;
@@ -38,15 +41,14 @@ public class Orden {
         this.total = BigDecimal.ZERO;
     }
 
-    public void agregarItem(ItemOrden item) {
-        item.setOrden(this);
-        items.add(item);
+    public void agregarItem(Integer cantidad, Producto producto) {
+        items.merge(producto, cantidad, Integer::sum);
         recalcularTotal();
     }
 
     public void recalcularTotal() {
-        total = items.stream()
-                .map(ItemOrden::getSubtotal)
+        total = items.entrySet().stream()
+                .map(e -> e.getKey().getPrecio().multiply(BigDecimal.valueOf(e.getValue())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 }
