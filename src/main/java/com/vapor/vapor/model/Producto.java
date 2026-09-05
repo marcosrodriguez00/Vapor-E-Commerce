@@ -39,6 +39,8 @@ public class Producto {
 
     private String genero;
 
+    private Long usuarioID;
+
     /** Sólo URLs, sin upload de binarios. */
     @ElementCollection
     @CollectionTable(name = "producto_imagen", joinColumns = @JoinColumn(name = "producto_id"))
@@ -64,5 +66,14 @@ public class Producto {
 
     public Long getProductoId() {
         return this.id;
+    }
+
+    public void setUsuarioId(Long id) {
+        this.usuarioID = id;
+    }
+
+
+    public Object getUsuarioId() {
+        return this.usuarioID;
     }
 }
