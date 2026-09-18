@@ -4,6 +4,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -32,11 +34,21 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    /** Le dice a Spring Security cómo buscar el usuario por email (subject del JWT/login). */
     @Bean
     public UserDetailsService userDetailsService() {
         return email -> usuarioRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + email));
+    }
+
+    // NUEVO: le damos a Spring un camino explícito para autenticar,
+    // conectando el UserDetailsService con el PasswordEncoder.
+    // Esto evita que AuthenticationConfiguration entre en un bucle
+    // buscando un AuthenticationManager que todavía no existe.
+    @Bean
+    public AuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService());
+        provider.setPasswordEncoder(passwordEncoder());
+        return provider;
     }
 
     @Bean
