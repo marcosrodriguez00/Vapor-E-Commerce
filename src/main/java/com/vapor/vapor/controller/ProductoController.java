@@ -1,6 +1,5 @@
 package com.vapor.vapor.controller;
 
-import com.vapor.vapor.model.Producto;
 import com.vapor.vapor.security.Roles;
 import com.vapor.vapor.dto.ProductoRequestDTO;
 import com.vapor.vapor.dto.ProductoResponseDTO;
