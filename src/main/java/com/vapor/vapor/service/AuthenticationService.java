@@ -56,7 +56,6 @@ public class AuthenticationService {
      *                - password: contraseña en texto plano que será encriptada
      * @return "User registered successfully" - mensaje de confirmación del registro exitoso
      * @throws RuntimeException si el email ya existe en el sistema 
-     *         (TODO: implementar excepción personalizada EmailException y manejar con @ControllerAdvice)
      */
     public String register(RegisterRequest request) {
 
