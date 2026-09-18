@@ -42,13 +42,14 @@ public class Orden {
     }
 
     public void agregarItem(Integer cantidad, Producto producto) {
-        items.merge(producto, cantidad, Integer::sum);
+        items.merge(producto, cantidad,
+            (existente, agregado) -> existente.intValue() + agregado.intValue());
         recalcularTotal();
     }
 
     public void recalcularTotal() {
         total = items.entrySet().stream()
                 .map(e -> e.getKey().getPrecio().multiply(BigDecimal.valueOf(e.getValue())))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+                .reduce(BigDecimal.ZERO, (subtotal, importe) -> subtotal.add(importe));
     }
 }
