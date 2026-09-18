@@ -35,7 +35,7 @@ public class Producto {
     /** Distingue un juego base de un DLC u otro contenido vendible. */
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private TipoProducto tipo = TipoProducto.JUEGO;
+    private TipoProducto tipo = TipoProducto.BASE;
 
     private String genero;
 
