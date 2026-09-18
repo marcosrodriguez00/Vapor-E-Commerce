@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import com.vapor.vapor.dto.LoginRequest;
 import com.vapor.vapor.dto.RegisterRequest;
+import com.vapor.vapor.exception.EmailException;
 import com.vapor.vapor.model.Role;
 import com.vapor.vapor.model.Usuario;
 import com.vapor.vapor.repository.UsuarioRepository;
@@ -65,10 +66,8 @@ public class AuthenticationService {
         // Se utiliza el método existsByEmail() del repositorio para una consulta eficiente.
         if (usuarioRepository.existsByEmail(request.getEmail())) {
             //TODO: ssanchez - crear exception personalizada EmailException y manejar con @ControllerAdvice
-            // Si el email ya existe, se lanza una excepción. En futuras actualizaciones se debe
-            // crear una excepción personalizada (EmailException) y capturarla en un @ControllerAdvice
-            // para devolver respuestas HTTP consistentes y mensajes de error profesionales
-            throw new RuntimeException("El email ya existe en la base de datos");
+            // DONE
+            throw new EmailException("El email ya existe en la base de datos");
         }
 
         // ==================== PASO 2: CONSTRUCCIÓN DEL OBJETO USUARIO ====================
