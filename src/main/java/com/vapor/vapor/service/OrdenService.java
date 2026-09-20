@@ -1,15 +1,18 @@
 package com.vapor.vapor.service;
 
-import com.vapor.vapor.dto.CompraRequestDTO;
+import com.vapor.vapor.exception.ResourceNotFoundException;
+import com.vapor.vapor.model.Carrito;
 import com.vapor.vapor.model.Orden;
 import com.vapor.vapor.model.Producto;
+import com.vapor.vapor.model.Usuario;
 import com.vapor.vapor.repository.OrdenRepository;
+import com.vapor.vapor.repository.ProductoRepository;
+import com.vapor.vapor.repository.UsuarioRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -17,21 +20,51 @@ import java.util.Map;
 public class OrdenService {
 
     private final OrdenRepository ordenRepository;
+    private final ProductoRepository productoRepository;
+    private final UsuarioRepository usuarioRepository;
+    private final CarritoService carritoService;
 
-    public OrdenService(OrdenRepository ordenRepository) {
+    public OrdenService(OrdenRepository ordenRepository, ProductoRepository productoRepository,
+                         UsuarioRepository usuarioRepository, CarritoService carritoService) {
         this.ordenRepository = ordenRepository;
+        this.productoRepository = productoRepository;
+        this.usuarioRepository = usuarioRepository;
+        this.carritoService = carritoService;
     }
 
     @Transactional
-    public Orden crear(CompraRequestDTO request) {
-        validar(request);
-        Orden orden = new Orden(request.usuarioId());
-        for (Map.Entry<Producto, Integer> entry : request.carrito().getItems().entrySet()) {
-            Producto producto = entry.getKey();
-            Integer cantidad = entry.getValue();
-            orden.agregarItem(cantidad, producto);
+    public Orden crear(Long usuarioId) {
+        Carrito carrito = carritoService.obtener(usuarioId);
+        if (carrito.getItems().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La compra no tiene items");
         }
-        return ordenRepository.save(orden);
+
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario " + usuarioId + " no encontrado"));
+
+        Orden orden = new Orden(usuario);
+        for (Map.Entry<Producto, Integer> entry : carrito.getItems().entrySet()) {
+            Integer cantidad = entry.getValue();
+            Long productoId = entry.getKey().getId();
+
+            Producto producto = productoRepository.findById(productoId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Producto " + productoId + " no encontrado"));
+
+            if (producto.getStock() < cantidad) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "Stock insuficiente para " + producto.getNombre() + " (disponible: " + producto.getStock() + ")");
+            }
+
+            producto.setStock(producto.getStock() - cantidad);
+            productoRepository.save(producto);
+            orden.agregarItem(cantidad, producto);
+            usuario.getBiblioteca().add(producto);
+        }
+
+        Orden guardada = ordenRepository.save(orden);
+        usuarioRepository.save(usuario);
+        carritoService.vaciar(usuarioId);
+        return guardada;
     }
 
     public List<Orden> historial(Long usuarioId) {
@@ -41,25 +74,5 @@ public class OrdenService {
     public Orden porId(Long id) {
         return ordenRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Orden " + id + " no encontrada"));
-    }
-
-    private void validar(CompraRequestDTO request) {
-        if (request == null || request.usuarioId() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Falta el usuarioId");
-        }
-        if (request.carrito() == null || request.carrito().getItems().isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La compra no tiene items");
-        }
-        for (Map.Entry<Producto, Integer> entry : request.carrito().getItems().entrySet()) {
-            if (entry.getKey() == null || entry.getKey().getId() == null) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Falta el productoId en un item");
-            }
-            if (entry.getValue() == null || entry.getValue() <= 0) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La cantidad debe ser mayor a 0");
-            }
-            if (entry.getKey().getPrecio() == null || entry.getKey().getPrecio().compareTo(BigDecimal.ZERO) < 0) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El precio no puede ser negativo");
-            }
-        }
     }
 }

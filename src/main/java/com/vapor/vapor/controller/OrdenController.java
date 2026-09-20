@@ -1,6 +1,5 @@
 package com.vapor.vapor.controller;
 
-import com.vapor.vapor.dto.CompraRequestDTO;
 import com.vapor.vapor.dto.OrdenDTO;
 import com.vapor.vapor.model.Orden;
 import com.vapor.vapor.model.Usuario;
@@ -26,11 +25,12 @@ public class OrdenController {
         this.usuarioRepository = usuarioRepository;
     }
 
-    @PostMapping
+    @PostMapping("/{usuarioId}")
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("isAuthenticated()")
-    public OrdenDTO crear(@RequestBody CompraRequestDTO request) {
-        return OrdenDTO.from(ordenService.crear(request));
+    public OrdenDTO crear(@PathVariable Long usuarioId, Authentication auth) {
+        validarOwnershipOAdmin(usuarioId, auth);
+        return OrdenDTO.from(ordenService.crear(usuarioId));
     }
 
     @GetMapping("/{usuarioId}")
@@ -44,7 +44,7 @@ public class OrdenController {
     @PreAuthorize("isAuthenticated()")
     public OrdenDTO detalle(@PathVariable Long id, Authentication auth) {
         Orden orden = ordenService.porId(id);
-        validarOwnershipOAdmin(orden.getUsuarioId(), auth);
+        validarOwnershipOAdmin(orden.getUsuario().getId(), auth);
         return OrdenDTO.from(orden);
     }
 

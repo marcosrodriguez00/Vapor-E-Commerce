@@ -2,7 +2,9 @@ package com.vapor.vapor.model;
 
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -44,6 +46,17 @@ public class Usuario implements UserDetails {
 
     // @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL)
     // private List<Pedido> pedidos;
+
+    // Juegos que el usuario tiene (se completa al confirmar una compra).
+    @ManyToMany
+    @JoinTable(
+            name = "usuario_biblioteca",
+            joinColumns = @JoinColumn(name = "usuario_id"),
+            inverseJoinColumns = @JoinColumn(name = "producto_id"))
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @Builder.Default
+    private Set<Producto> biblioteca = new HashSet<>();
 
     /**
      * getAuthorities() devuelve la colección de roles/permisos del usuario
