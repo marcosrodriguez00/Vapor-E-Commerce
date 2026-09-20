@@ -7,7 +7,9 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -48,8 +50,8 @@ public class Producto {
     private List<String> imagenes = new ArrayList<>();
 
     /** Lado inverso de la ManyToMany: usuarios que tienen este producto en su biblioteca. */
-    //@ManyToMany(mappedBy = "biblioteca")
-    //private List<Usuario> propietarios = new ArrayList<>();
+    @ManyToMany(mappedBy = "biblioteca")
+    private Set<Usuario> propietarios = new HashSet<>();
 
     public Producto(String nombre, String descripcion, BigDecimal precio, Integer stock, String genero) {
         this.nombre = nombre;
@@ -62,10 +64,6 @@ public class Producto {
     public Producto(String nombre, String descripcion, BigDecimal precio, Integer stock, String genero, TipoProducto tipo) {
         this(nombre, descripcion, precio, stock, genero);
         this.tipo = tipo;
-    }
-
-    public Long getProductoId() {
-        return this.id;
     }
 
     public void setUsuarioId(Long id) {
