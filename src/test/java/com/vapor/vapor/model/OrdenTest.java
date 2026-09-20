@@ -20,6 +20,6 @@ class OrdenTest {
 
     @Test
     void ordenSinItemsTieneTotalCero() {
-        assertEquals(BigDecimal.ZERO, new Orden(1L).getTotal());
+        assertEquals(BigDecimal.ZERO, new Orden(Usuario.builder().id(1L).build()).getTotal());
     }
 }

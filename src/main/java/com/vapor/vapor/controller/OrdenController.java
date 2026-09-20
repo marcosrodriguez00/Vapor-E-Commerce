@@ -44,7 +44,7 @@ public class OrdenController {
     @PreAuthorize("isAuthenticated()")
     public OrdenDTO detalle(@PathVariable Long id, Authentication auth) {
         Orden orden = ordenService.porId(id);
-        validarOwnershipOAdmin(orden.getUsuarioId(), auth);
+        validarOwnershipOAdmin(orden.getUsuario().getId(), auth);
         return OrdenDTO.from(orden);
     }
 

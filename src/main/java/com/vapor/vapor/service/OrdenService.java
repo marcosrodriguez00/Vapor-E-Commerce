@@ -42,7 +42,7 @@ public class OrdenService {
         Usuario usuario = usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario " + usuarioId + " no encontrado"));
 
-        Orden orden = new Orden(usuarioId);
+        Orden orden = new Orden(usuario);
         for (Map.Entry<Producto, Integer> entry : carrito.getItems().entrySet()) {
             Integer cantidad = entry.getValue();
             Long productoId = entry.getKey().getId();

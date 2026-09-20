@@ -20,8 +20,9 @@ public class Orden {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private Long usuarioId;
+    @ManyToOne
+    @JoinColumn(name = "usuario_id", nullable = false)
+    private Usuario usuario;
 
     @Column(nullable = false)
     private LocalDateTime fecha;
@@ -35,8 +36,8 @@ public class Orden {
     @Column(name = "cantidad", nullable = false)
     private Map<Producto, Integer> items = new HashMap<>();
 
-    public Orden(Long usuarioId) {
-        this.usuarioId = usuarioId;
+    public Orden(Usuario usuario) {
+        this.usuario = usuario;
         this.fecha = LocalDateTime.now();
         this.total = BigDecimal.ZERO;
     }

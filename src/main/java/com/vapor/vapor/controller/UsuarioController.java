@@ -1,6 +1,6 @@
 package com.vapor.vapor.controller;
 
-import com.vapor.vapor.dto.ProductoResponseDTO;
+import com.vapor.vapor.dto.BibliotecaItemDTO;
 import com.vapor.vapor.model.Usuario;
 import com.vapor.vapor.repository.UsuarioRepository;
 import com.vapor.vapor.service.UsuarioService;
@@ -28,7 +28,7 @@ public class UsuarioController {
 
     @GetMapping("/{usuarioId}/biblioteca")
     @PreAuthorize("isAuthenticated()")
-    public List<ProductoResponseDTO> biblioteca(@PathVariable Long usuarioId, Authentication auth) {
+    public List<BibliotecaItemDTO> biblioteca(@PathVariable Long usuarioId, Authentication auth) {
         validarOwnershipOAdmin(usuarioId, auth);
         return usuarioService.biblioteca(usuarioId);
     }

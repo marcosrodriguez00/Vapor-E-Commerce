@@ -1,6 +1,6 @@
 package com.vapor.vapor.service;
 
-import com.vapor.vapor.dto.ProductoResponseDTO;
+import com.vapor.vapor.dto.BibliotecaItemDTO;
 import com.vapor.vapor.exception.ResourceNotFoundException;
 import com.vapor.vapor.model.Usuario;
 import com.vapor.vapor.repository.UsuarioRepository;
@@ -17,9 +17,9 @@ public class UsuarioService {
         this.usuarioRepository = usuarioRepository;
     }
 
-    public List<ProductoResponseDTO> biblioteca(Long usuarioId) {
+    public List<BibliotecaItemDTO> biblioteca(Long usuarioId) {
         Usuario usuario = usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario " + usuarioId + " no encontrado"));
-        return usuario.getBiblioteca().stream().map(ProductoResponseDTO::from).toList();
+        return usuario.getBiblioteca().stream().map(BibliotecaItemDTO::from).toList();
     }
 }

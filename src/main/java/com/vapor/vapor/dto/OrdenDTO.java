@@ -20,6 +20,6 @@ public record OrdenDTO(Long id, Long usuarioId, LocalDateTime fecha, BigDecimal 
                     return new Item(producto.getId(), cantidad, producto.getPrecio(), subtotal);
                 })
                 .toList();
-        return new OrdenDTO(orden.getId(), orden.getUsuarioId(), orden.getFecha(), orden.getTotal(), items);
+        return new OrdenDTO(orden.getId(), orden.getUsuario().getId(), orden.getFecha(), orden.getTotal(), items);
     }
 }
