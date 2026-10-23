@@ -1,20 +1,27 @@
 package com.vapor.vapor.config;
 
 import com.vapor.vapor.model.Producto;
+import com.vapor.vapor.model.Role;
 import com.vapor.vapor.model.TipoProducto;
+import com.vapor.vapor.model.Usuario;
 import com.vapor.vapor.repository.ProductoRepository;
+import com.vapor.vapor.repository.UsuarioRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 /**
- * Carga datos de prueba solo si la tabla producto está vacía.
- * Esto evita duplicar los datos en cada reinicio de la app, ya que
+ * Carga datos de prueba al arrancar la app:
+ * - Un usuario ADMIN de desarrollo, si no existe uno con ese email.
+ * - El catálogo de productos, solo si la tabla producto está vacía.
+ * Ambas verificaciones evitan duplicar datos en cada reinicio, ya que
  * la base es MySQL persistente en Docker (no H2 en memoria).
  */
 @Component
@@ -23,14 +30,22 @@ public class SeedData implements CommandLineRunner {
     private static final Logger log = LoggerFactory.getLogger(SeedData.class);
 
     private final ProductoRepository productoRepository;
+    private final UsuarioRepository usuarioRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public SeedData(ProductoRepository productoRepository) {
+    public SeedData(ProductoRepository productoRepository, UsuarioRepository usuarioRepository,
+                    PasswordEncoder passwordEncoder) {
         this.productoRepository = productoRepository;
+        this.usuarioRepository = usuarioRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
     @Transactional
     public void run(String... args) {
+
+        // El admin se crea antes del guard de productos para que no dependa de él
+        seedAdmin();
 
         // Guard clause: si ya hay productos cargados, no volvemos a insertar
         if (productoRepository.count() > 0) {
@@ -117,5 +132,33 @@ public class SeedData implements CommandLineRunner {
         ));
 
         log.info("Seed cargado: {} productos", productoRepository.count());
+    }
+
+    /**
+     * Crea el usuario ADMIN si no existe (verificado por email).
+     * SOLO PARA DESARROLLO: estas credenciales son públicas y no deben
+     * usarse en producción.
+     */
+    private void seedAdmin() {
+        String email = "admin@vapor.com";
+
+        if (usuarioRepository.existsByEmail(email)) {
+            log.info("Ya existe el usuario admin ({}), se omite su seed.", email);
+            return;
+        }
+
+        Usuario admin = Usuario.builder()
+                .nombre("Admin")
+                .apellido("Vapor")
+                .email(email)
+                .fechaNacimiento(LocalDate.of(1990, 1, 1))
+                .sexo("Otro")
+                // Nunca guardar la contraseña en texto plano
+                .password(passwordEncoder.encode("Admin1234"))
+                .role(Role.ADMIN)
+                .build();
+        usuarioRepository.save(admin);
+
+        log.info("Seed cargado: usuario admin {}", email);
     }
 }
