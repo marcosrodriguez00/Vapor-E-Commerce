@@ -5,6 +5,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -52,13 +54,16 @@ public class SecurityConfig {
     // Usa el UserDetailsService para buscar el usuario en la base de datos
     // Usa el PasswordEncoder para verificar si la contraseña proporcionada coincide con la almacenada
     // Si todo es correcto, crea un token de autenticación; si no, lanza una excepción
-    // @Bean
-    // public AuthenticationProvider authenticationProvider() {
-    //     DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-    //     authProvider.setPasswordEncoder(passwordEncoder());
-    //     authProvider.setUserDetailsService(userDetailsService());
-    //     return authProvider;
-    // }
+    //
+    // Sin este bean, AuthenticationConfiguration no tiene un AuthenticationProvider
+    // concreto para delegar y termina resolviendo el AuthenticationManager contra
+    // sí mismo: recursión infinita -> StackOverflowError -> 403 en /api/auth/login.
+    @Bean
+    public AuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService());
+        authProvider.setPasswordEncoder(passwordEncoder());
+        return authProvider;
+    }
 
     /**
      * AuthenticationManager es el componente central de autenticación en Spring Security.
