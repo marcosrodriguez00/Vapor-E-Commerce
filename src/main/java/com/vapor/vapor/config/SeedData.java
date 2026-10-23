@@ -19,7 +19,7 @@ import java.util.List;
 
 /**
  * Carga datos de prueba al arrancar la app:
- * - Un usuario ADMIN de desarrollo, si no existe uno con ese email.
+ * - Usuarios de desarrollo (un ADMIN y un USER común), si no existe uno con cada email.
  * - El catálogo de productos, solo si la tabla producto está vacía.
  * Ambas verificaciones evitan duplicar datos en cada reinicio, ya que
  * la base es MySQL persistente en Docker (no H2 en memoria).
@@ -44,8 +44,9 @@ public class SeedData implements CommandLineRunner {
     @Transactional
     public void run(String... args) {
 
-        // El admin se crea antes del guard de productos para que no dependa de él
-        seedAdmin();
+        // Los usuarios se crean antes del guard de productos para que no dependan de él
+        crearUsuarioSiNoExiste("admin@vapor.com", "Admin1234", "Admin", "Vapor", Role.ADMIN);
+        crearUsuarioSiNoExiste("usuario@vapor.com", "User1234", "Usuario", "Prueba", Role.USER);
 
         // Guard clause: si ya hay productos cargados, no volvemos a insertar
         if (productoRepository.count() > 0) {
@@ -135,30 +136,28 @@ public class SeedData implements CommandLineRunner {
     }
 
     /**
-     * Crea el usuario ADMIN si no existe (verificado por email).
+     * Crea un usuario con el rol indicado si no existe (verificado por email).
      * SOLO PARA DESARROLLO: estas credenciales son públicas y no deben
      * usarse en producción.
      */
-    private void seedAdmin() {
-        String email = "admin@vapor.com";
-
+    private void crearUsuarioSiNoExiste(String email, String password, String nombre, String apellido, Role role) {
         if (usuarioRepository.existsByEmail(email)) {
-            log.info("Ya existe el usuario admin ({}), se omite su seed.", email);
+            log.info("Ya existe el usuario {} ({}), se omite su seed.", role, email);
             return;
         }
 
-        Usuario admin = Usuario.builder()
-                .nombre("Admin")
-                .apellido("Vapor")
+        Usuario usuario = Usuario.builder()
+                .nombre(nombre)
+                .apellido(apellido)
                 .email(email)
                 .fechaNacimiento(LocalDate.of(1990, 1, 1))
                 .sexo("Otro")
                 // Nunca guardar la contraseña en texto plano
-                .password(passwordEncoder.encode("Admin1234"))
-                .role(Role.ADMIN)
+                .password(passwordEncoder.encode(password))
+                .role(role)
                 .build();
-        usuarioRepository.save(admin);
+        usuarioRepository.save(usuario);
 
-        log.info("Seed cargado: usuario admin {}", email);
+        log.info("Seed cargado: usuario {} {}", role, email);
     }
 }
