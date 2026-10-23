@@ -1,6 +1,7 @@
 package com.vapor.vapor.controller;
 
 import com.vapor.vapor.dto.BibliotecaItemDTO;
+import com.vapor.vapor.dto.UsuarioPerfilDTO;
 import com.vapor.vapor.model.Usuario;
 import com.vapor.vapor.repository.UsuarioRepository;
 import com.vapor.vapor.service.UsuarioService;
@@ -24,6 +25,13 @@ public class UsuarioController {
     public UsuarioController(UsuarioService usuarioService, UsuarioRepository usuarioRepository) {
         this.usuarioService = usuarioService;
         this.usuarioRepository = usuarioRepository;
+    }
+
+    // Perfil del usuario logueado (sin password).
+    @GetMapping("/me")
+    @PreAuthorize("isAuthenticated()")
+    public UsuarioPerfilDTO me(Authentication auth) {
+        return usuarioService.perfil(auth.getName());
     }
 
     @GetMapping("/{usuarioId}/biblioteca")
