@@ -39,6 +39,18 @@ public class SchemaFix implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
+        String motor = jdbcTemplate.execute(
+                (java.sql.Connection connection) -> connection.getMetaData().getDatabaseProductName());
+
+        // Este fix es para bases MySQL heredadas con un ENUM nativo viejo.
+        // Contra H2 (por ejemplo, en desarrollo sin Docker) la consulta a
+        // information_schema no encuentra la fila -las columnas quedan en
+        // mayúscula- y explota sin necesidad: ahí directamente no aplica.
+        if (!"MySQL".equalsIgnoreCase(motor)) {
+            log.debug("SchemaFix se omite: la base activa es {} (el fix es solo para MySQL).", motor);
+            return;
+        }
+
         COLUMNAS_A_CORREGIR.forEach(this::corregirSiEsEnum);
     }
 
