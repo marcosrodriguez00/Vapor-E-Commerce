@@ -9,7 +9,8 @@ import java.util.List;
 
 public record OrdenDTO(Long id, Long usuarioId, LocalDateTime fecha, BigDecimal total, List<Item> items) {
 
-    public record Item(Long productoId, Integer cantidad, BigDecimal precioUnitario, BigDecimal subtotal) {}
+    // imagen: primera imagen del producto, o null si no tiene.
+    public record Item(Long productoId, String nombre, String imagen, Integer cantidad, BigDecimal precioUnitario, BigDecimal subtotal) {}
 
     public static OrdenDTO from(Orden orden) {
         List<Item> items = orden.getItems().entrySet().stream()
@@ -17,7 +18,9 @@ public record OrdenDTO(Long id, Long usuarioId, LocalDateTime fecha, BigDecimal 
                     Producto producto = e.getKey();
                     Integer cantidad = e.getValue();
                     BigDecimal subtotal = producto.getPrecio().multiply(BigDecimal.valueOf(cantidad));
-                    return new Item(producto.getId(), cantidad, producto.getPrecio(), subtotal);
+                    List<String> imagenes = producto.getImagenes();
+                    String imagen = (imagenes == null || imagenes.isEmpty()) ? null : imagenes.get(0);
+                    return new Item(producto.getId(), producto.getNombre(), imagen, cantidad, producto.getPrecio(), subtotal);
                 })
                 .toList();
         return new OrdenDTO(orden.getId(), orden.getUsuario().getId(), orden.getFecha(), orden.getTotal(), items);

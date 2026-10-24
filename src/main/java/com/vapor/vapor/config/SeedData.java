@@ -1,20 +1,28 @@
 package com.vapor.vapor.config;
 
 import com.vapor.vapor.model.Producto;
+import com.vapor.vapor.model.Role;
 import com.vapor.vapor.model.TipoProducto;
+import com.vapor.vapor.model.Usuario;
 import com.vapor.vapor.repository.ProductoRepository;
+import com.vapor.vapor.repository.UsuarioRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 /**
- * Carga datos de prueba solo si la tabla producto está vacía.
- * Esto evita duplicar los datos en cada reinicio de la app, ya que
+ * Carga datos de prueba al arrancar la app:
+ * - Usuarios de desarrollo (un ADMIN y un USER común), creados solo si no
+ *   existe uno con cada email.
+ * - El catálogo de productos, solo si la tabla producto está vacía.
+ * Ambas verificaciones evitan duplicar datos en cada reinicio, ya que
  * la base es MySQL persistente en Docker (no H2 en memoria).
  */
 @Component
@@ -23,14 +31,23 @@ public class SeedData implements CommandLineRunner {
     private static final Logger log = LoggerFactory.getLogger(SeedData.class);
 
     private final ProductoRepository productoRepository;
+    private final UsuarioRepository usuarioRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public SeedData(ProductoRepository productoRepository) {
+    public SeedData(ProductoRepository productoRepository, UsuarioRepository usuarioRepository,
+                    PasswordEncoder passwordEncoder) {
         this.productoRepository = productoRepository;
+        this.usuarioRepository = usuarioRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
     @Transactional
     public void run(String... args) {
+
+        // Los usuarios se crean antes del guard de productos para que no dependan de él
+        crearUsuarioSiNoExiste("admin@vapor.com", "Admin1234", "Admin", "Vapor", Role.ADMIN);
+        crearUsuarioSiNoExiste("usuario@vapor.com", "User1234", "Usuario", "Prueba", Role.USER);
 
         // Guard clause: si ya hay productos cargados, no volvemos a insertar
         if (productoRepository.count() > 0) {
@@ -117,5 +134,31 @@ public class SeedData implements CommandLineRunner {
         ));
 
         log.info("Seed cargado: {} productos", productoRepository.count());
+    }
+
+    /**
+     * Crea un usuario con el rol indicado si no existe (verificado por email).
+     * SOLO PARA DESARROLLO: estas credenciales son públicas y no deben
+     * usarse en producción.
+     */
+    private void crearUsuarioSiNoExiste(String email, String password, String nombre, String apellido, Role role) {
+        if (usuarioRepository.existsByEmail(email)) {
+            log.info("Ya existe el usuario {} ({}), se omite su seed.", role, email);
+            return;
+        }
+
+        Usuario usuario = Usuario.builder()
+                .nombre(nombre)
+                .apellido(apellido)
+                .email(email)
+                .fechaNacimiento(LocalDate.of(1990, 1, 1))
+                .sexo("Otro")
+                // Nunca guardar la contraseña en texto plano
+                .password(passwordEncoder.encode(password))
+                .role(role)
+                .build();
+        usuarioRepository.save(usuario);
+
+        log.info("Seed cargado: usuario {} {}", role, email);
     }
 }
