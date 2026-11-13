@@ -5,8 +5,10 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.util.WebUtils;
 
 import jakarta.servlet.FilterChain;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -18,6 +20,9 @@ import java.util.stream.Collectors;
 //este filtro se ejecuta antes de llamar al controller
 //fue configurado en SecurityConfig en la instrucción `addFilterBefore`
 public class JwtFilter extends OncePerRequestFilter {
+
+    // Nombre de la cookie HttpOnly donde AuthenticationController guarda el JWT al hacer login
+    public static final String COOKIE_TOKEN = "token";
     private final JwtUtil jwtUtil;
 
     public JwtFilter(JwtUtil jwtUtil) {
@@ -36,12 +41,24 @@ public class JwtFilter extends OncePerRequestFilter {
         // 1. Obtiene el encabezado "Authorization" de la petición.
         // en header se almacen esto ej: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJycGVyZXpAZ21haWwuY29tIiwicm9sZXMiOiJST0xFX1VTRVIiLCJpYXQiOjE3NjEwMDc4MzIsImV4cCI6MTc2MTA5NDIzMn0.FcLd28t-inYFaz7Sbe4slGBafJoqZtChCszmsckCLB
         String header = request.getHeader("Authorization");
+        String token = null;
 
         // 2. Verifica si el encabezado existe y si comienza con "Bearer ".
         if (header != null && header.startsWith("Bearer ")) {
             //extrae la parte del JWT de la cabecera de autorización, eliminando el prefijo "Bearer ".
             // ej token: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJycGVyZXpAZ21haWwuY29tIiwicm9sZXMiOiJST0xFX1VTRVIiLCJpYXQiOjE3NjEwMDc4MzIsImV4cCI6MTc2MTA5NDIzMn0.FcLd28t-inYFaz7Sbe4slGBafJoqZtChCszmsckCLBU
-            String token = header.substring(7);
+            token = header.substring(7);
+        } else {
+            // 3. Si no viene en el header, lo busca en la cookie HttpOnly que setea el login.
+            // Es el caso del front: el navegador manda la cookie solo y JavaScript nunca ve el token.
+            // El header se mantiene para poder probar la API desde Postman.
+            Cookie cookie = WebUtils.getCookie(request, COOKIE_TOKEN);
+            if (cookie != null && !cookie.getValue().isBlank()) {
+                token = cookie.getValue();
+            }
+        }
+
+        if (token != null) {
             // 4. Valida el token usando `jwtUtil.validateToken()`.
             if (jwtUtil.validateToken(token)) {
                 // 5. Si el token es válido, extrae el nombre de usuario y los roles del token.
