@@ -166,7 +166,7 @@ public class SecurityConfig {
         // Autoriza solicitudes provenientes del frontend en localhost:5173.
         configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173"));
         // Permite que el frontend use estos métodos HTTP.
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         // Acepta cualquier encabezado enviado en las solicitudes.
         configuration.setAllowedHeaders(Collections.singletonList("*"));
         // Permite enviar cookies y credenciales entre distintos orígenes.
