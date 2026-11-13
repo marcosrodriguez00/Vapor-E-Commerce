@@ -10,6 +10,7 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -109,7 +110,13 @@ public class SecurityConfig {
 
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                // El token viaja en una cookie, que el navegador manda sola: eso abre la puerta a CSRF.
+                // La cookie es SameSite=Strict (ver AuthenticationController), así que el navegador no la
+                // envía en pedidos originados en otro sitio, y CORS solo acepta el origen del front.
                 .csrf(csrf -> csrf.disable())
+                // Stateless: el servidor no guarda sesión (ni crea la cookie JSESSIONID);
+                // cada pedido se autentica con el JWT de la cookie o del header
+                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         // Rutas públicas que no requieren autenticación
                         //el controller /api/auth puede ser solicitado por cualquier usuario
